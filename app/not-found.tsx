@@ -10,7 +10,6 @@ const NotFound = () => {
   const router = useRouter();
 
   useEffect(() => {
-    // Редірект через 3 секунди
     const timer = setTimeout(() => router.push('/'), 3000);
     return () => clearTimeout(timer);
   }, [router]);
