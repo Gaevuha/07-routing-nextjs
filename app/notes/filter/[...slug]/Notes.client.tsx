@@ -24,13 +24,14 @@ interface NotesClientProps {
 
 export default function NotesClient({
   initialData,
-  initialTag,
+  initialSearchQuery,
+  initialPage,
+  initialTag = '',
 }: NotesClientProps) {
-  const router = useRouter();
-
-  const [inputValue, setInputValue] = useState('');
-  const [page, setPage] = useState(1);
+  const [inputValue, setInputValue] = useState(initialSearchQuery);
+  const [page, setPage] = useState(initialPage);
   const [searchQuery] = useDebounce(inputValue, 300);
+  const [tag] = useState(initialTag);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = () => setIsModalOpen(true);
@@ -38,11 +39,11 @@ export default function NotesClient({
 
   useEffect(() => {
     setPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, tag]);
 
   const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['notes', searchQuery, page, initialTag],
-    queryFn: () => fetchNotes(searchQuery, page, 12, initialTag),
+    queryKey: ['notes', searchQuery, page, tag],
+    queryFn: () => fetchNotes(searchQuery, page, 12, tag),
     initialData,
     refetchOnMount: false,
   });
