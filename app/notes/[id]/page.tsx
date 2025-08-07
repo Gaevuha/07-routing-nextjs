@@ -1,3 +1,4 @@
+// app/notes/[id]/pages.tsx
 import {
   HydrationBoundary,
   dehydrate,

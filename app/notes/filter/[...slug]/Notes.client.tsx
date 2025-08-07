@@ -24,8 +24,6 @@ interface NotesClientProps {
 
 export default function NotesClient({
   initialData,
-  initialSearchQuery,
-  initialPage,
   initialTag,
 }: NotesClientProps) {
   const router = useRouter();

@@ -3,9 +3,7 @@ import { fetchNotes } from '@/lib/api';
 import { notFound } from 'next/navigation';
 
 type Props = {
-  params: {
-    slug?: string[];
-  };
+  params: Promise<{ slug?: string[] }>;
 };
 
 export default async function FilteredNotesPage({ params }: Props) {

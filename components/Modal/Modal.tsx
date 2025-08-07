@@ -24,9 +24,10 @@ export default function Modal({ onClose, children }: ModalProps) {
       document.body.style.overflow = '';
     };
   }, [onClose]);
-
-  const handleBackdropClick = () => {
-    onClose();
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
   };
 
   const stopPropagation = (e: React.MouseEvent) => {
