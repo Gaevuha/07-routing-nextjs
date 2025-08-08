@@ -8,7 +8,7 @@ if (!ACCESS_TOKEN) {
   throw new Error('NoteHub API key is missing');
 }
 
-export default interface fetchNotesProps {
+export interface FetchNotesResponse {
   notes: Note[];
   totalPages: number;
 }
@@ -18,10 +18,10 @@ export const fetchNotes = async (
   page: number = 1,
   perPage: number = 12,
   tag?: string,
-): Promise<fetchNotesProps> => {
+): Promise<FetchNotesResponse> => {
   const params: Record<string, string | number> = { page, perPage };
 
-  if (query.trim() !== '') {
+  if (query.trim()) {
     params.search = query;
   }
 
@@ -30,7 +30,7 @@ export const fetchNotes = async (
   }
 
   try {
-    const result = await axios.get<fetchNotesProps>('/notes', {
+    const result = await axios.get<FetchNotesResponse>('/notes', {
       params,
       headers: {
         Authorization: `Bearer ${ACCESS_TOKEN}`,
@@ -56,7 +56,6 @@ export const fetchNoteById = async (id: string): Promise<Note> => {
         Authorization: `Bearer ${ACCESS_TOKEN}`,
       },
     });
-
     return response.data;
   } catch (error: unknown) {
     if (
@@ -88,7 +87,7 @@ export const createNote = async (noteData: NewNoteData): Promise<Note> => {
   }
 };
 
-export const deleteNote = async (noteId: string | number): Promise<Note> => {
+export const deleteNote = async (noteId: string): Promise<Note> => {
   try {
     const result = await axios.delete<Note>(`/notes/${noteId}`, {
       headers: {
@@ -109,7 +108,7 @@ export const deleteNote = async (noteId: string | number): Promise<Note> => {
 
 export const fetchTags = async (): Promise<string[]> => {
   try {
-    const result = await axios.get<fetchNotesProps>('/notes', {
+    const result = await axios.get<FetchNotesResponse>('/notes', {
       params: {
         page: 1,
         perPage: 12,
@@ -119,10 +118,12 @@ export const fetchTags = async (): Promise<string[]> => {
       },
     });
 
-    const allTags = result.data.notes.map(note => note.tag);
-    const tagsById = Array.from(new Set(allTags)).filter(Boolean);
-    return tagsById;
-  } catch (error: unknown) {
+    const allTags = result.data.notes
+      .map(note => note.tag)
+      .filter((tag): tag is string => Boolean(tag));
+
+    return Array.from(new Set(allTags));
+  } catch (error) {
     console.error('fetchTags error:', error);
     return [];
   }

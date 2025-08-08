@@ -1,22 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import css from './TagsMenu.module.css';
-import { fetchTags } from '@/lib/api';
 
 const TagsMenu = () => {
-  const [tags, setTags] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    const loadTags = async () => {
-      const tagsById = await fetchTags();
-      setTags(tagsById);
-    };
+  const tags = ['All', 'Todo', 'Work', 'Personal', 'Meeting', 'Shopping'];
 
-    loadTags();
-  }, []);
+  const handleLinkClick = () => {
+    setIsOpen(false);
+  };
 
   return (
     <div className={css.menuContainer}>
@@ -29,16 +24,12 @@ const TagsMenu = () => {
 
       {isOpen && (
         <ul className={css.menuList}>
-          <li className={css.menuItem}>
-            <Link href="/notes/filter/all" className={css.menuLink}>
-              All notes
-            </Link>
-          </li>
           {tags.map(tag => (
             <li key={tag} className={css.menuItem}>
               <Link
-                href={`/notes/filter/${encodeURIComponent(tag)}`}
+                href={`/notes/filter/${tag}`}
                 className={css.menuLink}
+                onClick={handleLinkClick}
               >
                 {tag}
               </Link>

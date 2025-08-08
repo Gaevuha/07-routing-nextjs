@@ -7,13 +7,13 @@ type Props = {
 };
 
 export default async function FilteredNotesPage({ params }: Props) {
-  const resolvedParams = await params;
-  const tag = resolvedParams.slug?.[0];
-  const tagParam = tag === 'all' ? undefined : tag;
+  const { slug } = await params;
+  const tag = slug?.[0] || 'All';
+  const tagParam = tag === 'All' ? undefined : tag;
 
   const data = await fetchNotes('', 1, 12, tagParam);
 
-  if (tag && data.notes.length === 0) {
+  if (tagParam && data.notes.length === 0) {
     notFound();
   }
 
@@ -22,7 +22,7 @@ export default async function FilteredNotesPage({ params }: Props) {
       initialData={data}
       initialSearchQuery=""
       initialPage={1}
-      initialTag={tagParam || ''}
+      initialTag={tag}
     />
   );
 }

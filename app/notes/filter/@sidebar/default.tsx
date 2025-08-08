@@ -2,21 +2,14 @@
 
 import css from './SidebarNotes.module.css';
 import Link from 'next/link';
-import { fetchTags } from '@/lib/api';
 
-const NotesSidebar = async () => {
-  const tags = await fetchTags();
+const STATIC_TAGS = ['All', 'Todo', 'Work', 'Personal', 'Meeting', 'Shopping'];
 
+const NotesSidebar = () => {
   return (
     <div>
       <ul className={css.menuList}>
-        <li className={css.menuItem}>
-          <Link href="/notes/filter/all" className={css.menuLink}>
-            All notes
-          </Link>
-        </li>
-
-        {tags.map(tag => (
+        {STATIC_TAGS.map(tag => (
           <li key={tag} className={css.menuItem}>
             <Link
               href={`/notes/filter/${encodeURIComponent(tag)}`}
