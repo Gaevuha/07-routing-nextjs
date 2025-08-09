@@ -17,12 +17,5 @@ export default async function FilteredNotesPage({ params }: Props) {
     notFound();
   }
 
-  return (
-    <NotesClient
-      initialData={data}
-      initialSearchQuery=""
-      initialPage={1}
-      initialTag={tag}
-    />
-  );
+  return <NotesClient initialData={data} initialTag={tag} />;
 }
