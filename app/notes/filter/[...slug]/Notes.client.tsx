@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useDebounce } from 'use-debounce';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { useParams } from 'next/navigation';
 import Loading from '@/app/loading';
 import { fetchNotes } from '@/lib/api';
 import SearchBox from '@/components/SearchBox/SearchBox';
@@ -16,47 +15,33 @@ import type { FetchNotesResponse } from '@/lib/api';
 
 interface NotesClientProps {
   initialData: FetchNotesResponse;
-  initialSearchQuery: string;
-  initialPage: number;
   initialTag?: string;
 }
 
 export default function NotesClient({
   initialData,
-  initialSearchQuery,
-  initialPage,
   initialTag,
 }: NotesClientProps) {
-  const params = useParams();
+  const tag = initialTag ?? 'All';
+  const tagParam = tag === 'All' ? undefined : tag;
 
-  const currentTag =
-    Array.isArray(params.slug) && params.slug.length > 0
-      ? params.slug[0]
-      : initialTag || 'All';
-
-  const tagParam = currentTag === 'All' ? undefined : currentTag;
-
-  const [inputValue, setInputValue] = useState(initialSearchQuery);
-  const [page, setPage] = useState(initialPage);
-  const [searchQuery] = useDebounce(inputValue, 300);
+  const [inputValue, setInputValue] = useState('');
+  const [page, setPage] = useState(1);
+  const [debouncedSearchQuery] = useDebounce(inputValue, 300);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  useEffect(() => {
-    setPage(1);
-  }, [searchQuery, tagParam]);
 
   const { data, isLoading, isError, error, refetch } =
     useQuery<FetchNotesResponse>({
-      queryKey: ['notes', searchQuery, page, tagParam],
-      queryFn: () => fetchNotes(searchQuery, page, 12, tagParam),
+      queryKey: ['notes', tagParam ?? 'All', debouncedSearchQuery, page],
+      queryFn: () => fetchNotes(debouncedSearchQuery, page, 12, tagParam),
       initialData,
       refetchOnMount: false,
       placeholderData: keepPreviousData,
     });
 
-  const handleNoteCreated = () => {
+  const handleNoteSaved = async () => {
     setIsModalOpen(false);
-    refetch();
+    await refetch();
   };
 
   if (isLoading) return <Loading />;
@@ -65,7 +50,13 @@ export default function NotesClient({
   return (
     <div className={css.app}>
       <div className={css.toolbar}>
-        <SearchBox value={inputValue} onSearch={setInputValue} />
+        <SearchBox
+          value={inputValue}
+          onSearch={value => {
+            setInputValue(value);
+            setPage(1);
+          }}
+        />
 
         {data && data.totalPages > 1 && (
           <Pagination
@@ -86,8 +77,8 @@ export default function NotesClient({
       {isModalOpen && (
         <Modal onClose={() => setIsModalOpen(false)}>
           <NoteForm
+            onSaved={handleNoteSaved}
             onCloseModal={() => setIsModalOpen(false)}
-            onNoteCreated={handleNoteCreated}
           />
         </Modal>
       )}

@@ -1,13 +1,13 @@
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import css from './NoteForm.module.css';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { createNote } from '@/lib/api';
 import type { NewNoteData } from '../../types/note';
 
 interface NoteFormProps {
+  onSaved: () => void;
   onCloseModal: () => void;
-  onNoteCreated: () => void;
 }
 
 const validationSchema = Yup.object({
@@ -21,18 +21,11 @@ const validationSchema = Yup.object({
     .required('Tag is required'),
 });
 
-export default function NoteForm({
-  onCloseModal,
-  onNoteCreated,
-}: NoteFormProps) {
-  const queryClient = useQueryClient();
-
+export default function NoteForm({ onSaved, onCloseModal }: NoteFormProps) {
   const { mutate, isPending } = useMutation({
     mutationFn: (noteData: NewNoteData) => createNote(noteData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] });
-      onCloseModal();
-      onNoteCreated();
+      onSaved();
     },
   });
 
@@ -41,7 +34,7 @@ export default function NoteForm({
       initialValues={{
         title: '',
         content: '',
-        tag: '',
+        tag: 'Todo',
       }}
       validationSchema={validationSchema}
       onSubmit={values => {
@@ -61,7 +54,7 @@ export default function NoteForm({
             as="textarea"
             id="content"
             name="content"
-            rows="8"
+            rows={8}
             className={css.textarea}
           />
           <ErrorMessage name="content" component="span" className={css.error} />
@@ -85,7 +78,7 @@ export default function NoteForm({
             onClick={onCloseModal}
             className={css.cancelButton}
           >
-            Cancel
+            Close
           </button>
           <button
             type="submit"
